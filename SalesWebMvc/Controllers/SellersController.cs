@@ -23,7 +23,7 @@ namespace SalesWebMvc.Controllers
         }
         public async Task<IActionResult> Create()
         {
-            var departments = await  _departmentService.FindAllAsync();
+            var departments = await _departmentService.FindAllAsync();
             var viewModel = new SellerFormViewModel { Departments = departments };
             return View(viewModel);
         }
@@ -85,8 +85,15 @@ namespace SalesWebMvc.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            await _sellerService.RemoveAsync(id);
-            return RedirectToAction(nameof(Index));
+            try
+            {
+                await _sellerService.RemoveAsync(id);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (IntegrityException e)
+            {
+                throw new IntegrityException("Can't delete seller because he/she has sales");
+            }
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
